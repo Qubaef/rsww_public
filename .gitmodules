@@ -1,0 +1,6 @@
+[submodule "src/frontend/simple-tour-agent-front"]
+	path = src/frontend/simple-tour-agent-front
+	url = https://github.com/blue-pitaya/simple-tour-agent-front.git
+[submodule "src/scraper/scraper-platform"]
+	path = src/scraper/scraper-platform
+	url = https://github.com/blue-pitaya/scraper-platform

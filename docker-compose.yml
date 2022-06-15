@@ -1,0 +1,109 @@
+version: "3.9"
+
+services:
+    rabbitmq:
+        image: masstransit/rabbitmq
+        container_name: rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        environment:
+            - RABBITMQ_NODENAME=rabbit
+            - RABBITMQ_DEFAULT_USER=admin
+            - RABBITMQ_DEFAULT_PASS=admin
+
+    admin-mongodb_mongo:
+        image: mongo
+        container_name: MongoDB
+        ports:
+            - "27017:27017"
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: student
+
+    admin-postgres_db:
+        image: postgres
+        container_name: PostgresDB
+        restart: always
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: student
+            POSTGRES_DB: RSWW_175454_hotelmanager
+
+    frontend:
+        container_name: Frontend
+        build:
+            context: src/frontend
+        ports:
+            - "8080:80"
+        hostname: frontend
+
+    apigateway:
+        build: src/backend/microservices/ApiGateway
+        env_file:
+            - common.env
+        ports:
+            - "82:80"
+        environment:
+            - CORS_ORIGINS=http://localhost:8080
+
+    ordermanager:
+        build: src/backend/microservices/OrderManager
+        env_file:
+           - common.env
+        ports:
+            - "83:80"
+        depends_on:
+            - admin-mongodb_mongo
+        environment:
+            - MONGODB_DATABASE=RSWW_175454_ordermanager
+            - MONGODB_COLLECTION=OrderCollection
+       
+    offergenerator:
+        build: src/backend/microservices/OfferGenerator
+        env_file:
+            - common.env
+        ports:
+            - "84:80"
+
+    hotelmanager:
+        build: src/backend/microservices/HotelManager
+        depends_on:
+            - admin-postgres_db
+        env_file:
+            - common.env
+        ports:
+            - "85:80"
+        environment:
+            - POSTGRESQL_CONNECTION_STRING=Host=admin-postgres_db;Port=5432;Database=RSWW_175454_hotelmanager;username=postgres;Password=student
+            - MONGODB_DATABASE=RSWW_175454_hotelmanager
+            - MONGODB_COLLECTION=HotelEvent           
+
+    transportmanager:
+        build: src/backend/microservices/TransportManager
+        env_file:
+            - common.env
+        ports:
+            - "86:80"
+        depends_on:
+            - admin-mongodb_mongo
+        environment:
+            - MONGODB_DATABASE=RSWW_175454_transportmanager
+            - MONGODB_COLLECTION=TransportCollection
+            - MONGODB_EVENT_COLLECTION=TransportEventCollection
+
+    paymentmanager:
+        build: src/backend/microservices/PaymentManager
+        env_file:
+           - common.env
+        ports:
+            - "87:80"
+
+    tooperator:
+        build: src/backend/microservices/TOOperator
+        env_file:
+           - common.env
+        ports:
+            - "88:80"

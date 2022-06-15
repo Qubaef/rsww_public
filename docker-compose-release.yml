@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+    frontend:
+        container_name: Frontend
+        image: etav/rsww_frontend
+        build:
+            context: src/frontend
+            args:
+                - API_HOST=localhost:17546
+
+    apigateway:
+        image: etav/rsww_apigateway
+        build:
+          context: .
+          dockerfile: src/backend/microservices/ApiGateway/Dockerfile
+
+    ordermanager:
+        image: etav/rsww_ordermanager
+        build:
+          context: .
+          dockerfile: src/backend/microservices/OrderManager/Dockerfile.fix
+
+    offergenerator:
+        image: etav/rsww_offergenerator
+        build:
+          context: .
+          dockerfile: src/backend/microservices/OfferGenerator/Dockerfile
+
+    hotelmanager:
+        image: etav/rsww_hotelmanager
+        build:
+          context: .
+          dockerfile: src/backend/microservices/HotelManager/Dockerfile
+
+    transportmanager:
+        image: etav/rsww_transportmanager
+        build:
+          context: .
+          dockerfile: src/backend/microservices/TransportManager/Dockerfile.fix
+
+    paymentmanager:
+        image: etav/rsww_paymentmanager
+        build:
+          context: .
+          dockerfile: src/backend/microservices/PaymentManager/Dockerfile
+
+    tooperator:
+        image: etav/rsww_tooperator
+        build:
+          context: .
+          dockerfile: src/backend/microservices/TOOperator/Dockerfile

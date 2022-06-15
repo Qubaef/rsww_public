@@ -1,0 +1,82 @@
+version: "3.9"
+
+services:
+    rabbitmq:
+        image: masstransit/rabbitmq
+        container_name: rabbitmq
+        ports:
+            - "5672:5672"
+            - "15672:15672"
+        environment:
+            - RABBITMQ_NODENAME=rabbit
+            - RABBITMQ_DEFAULT_USER=admin
+            - RABBITMQ_DEFAULT_PASS=admin
+
+    frontend:
+        container_name: Frontend
+        image: etav/rsww_frontend
+        ports:
+            - "17545:80"
+        hostname: frontend
+
+    apigateway:
+        image: etav/rsww_apigateway
+        depends_on:
+            - rabbitmq
+        env_file:
+            - deploy.env
+        ports:
+            - "17546:80"
+        environment:
+            - CORS_ORIGINS=http://*:17546
+
+    ordermanager:
+        image: etav/rsww_ordermanager
+        depends_on:
+            - rabbitmq
+        env_file:
+            - deploy.env
+        environment:
+            - MONGODB_DATABASE=RSWW_175454_ordermanager
+            - MONGODB_COLLECTION=OrderCollection
+
+    offergenerator:
+        image: etav/rsww_offergenerator
+        depends_on:
+            - rabbitmq
+        env_file:
+            - deploy.env
+
+    hotelmanager:
+        image: etav/rsww_hotelmanager
+        depends_on:
+            - rabbitmq
+        env_file:
+            - deploy.env
+        environment:
+            - POSTGRESQL_CONNECTION_STRING=Host=actina15.maas;Port=5432;Database=RSWW_175454_hotelmanager;username=postgres;Password=student
+            - MONGODB_DATABASE=RSWW_175454_hotelmanager
+            - MONGODB_COLLECTION=HotelEvent
+
+    transportmanager:
+        image: etav/rsww_transportmanager
+        env_file:
+            - deploy.env
+        environment:
+            - MONGODB_DATABASE=RSWW_175454_transportmanager
+            - MONGODB_COLLECTION=TransportCollection
+            - MONGODB_EVENT_COLLECTION=TransportEventCollection
+
+    paymentmanager:
+        image: etav/rsww_paymentmanager
+        depends_on:
+            - rabbitmq
+        env_file:
+            - deploy.env
+
+    tooperator:
+        image: etav/rsww_tooperator
+        depends_on:
+            - rabbitmq
+        env_file:
+            - deploy.env
